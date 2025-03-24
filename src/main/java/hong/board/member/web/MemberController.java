@@ -33,7 +33,7 @@ public class MemberController {
 
     //회원가입
     @PostMapping("/join")
-    public String join(@Valid MemberDto memberDto, BindingResult bindingResult, Model model) {
+    public String joinMember(@Valid MemberDto memberDto, BindingResult bindingResult, Model model) {
 
         if(bindingResult.hasErrors()) {
             log.info("error={}", bindingResult);
@@ -71,7 +71,7 @@ public class MemberController {
 
         if(result == 1) {
             resultMap.put("status", "error");
-            resultMap.put("message", "이미 사용 중인 아이디입니다.");
+            resultMap.put("message", "이미 사용중인 아이디입니다.");
         } else if(result == 0) {
             resultMap.put("status", "success");
             resultMap.put("message", "사용 가능한 아이디입니다.");
@@ -81,11 +81,26 @@ public class MemberController {
 
     //회원수정 폼
     @GetMapping("/updateForm")
-    public String updateForm(@RequestParam("memberId") String memberId, Model model) {
-
+    public String updateForm(@RequestParam("memberId") String memberId, @Valid MemberDto memberDto, BindingResult bindingResult, Model model) {
+        
+        //회원 찾기
         Member member = memberService.findByMemberId(memberId);
-        model.addAttribute("member", member);
+        model.addAttribute("memberDto", member);
         return "/member/updateForm";
+    }
+
+    //회원수정
+    @PostMapping("/update")
+    public String updateMember(@Valid MemberDto memberDto, BindingResult bindingResult, Model model) {
+
+        if(bindingResult.hasErrors()) {
+            model.addAttribute("memberDto", memberDto);
+            return "member/updateForm";
+        }
+        
+        //수정
+        memberService.updateMember(memberDto);
+        return "redirect:/loginPage";
     }
 
 }

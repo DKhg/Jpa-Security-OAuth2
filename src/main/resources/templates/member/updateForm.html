@@ -3,8 +3,80 @@
 <head>
   <meta charset="UTF-8">
   <title>회원수정</title>
+  <!-- JQUERY -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <!-- CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- JS -->
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js"></script>
+  <script type="text/javascript">
+    $(document).ready(function() {
+        //이메일 입력값 변경 시 인증번호 버튼 생성
+        $("#memberEmail").on('input', function() {
+            $("#authYn").val("N");
+            $("#sendBtn").css("display","block");
+        });
+
+        // 등록 전 이메일 인증 여부 확인
+        $("#updateForm").on("submit", function(event) {
+            if ($("#memberEmail").val() !== "" && $("#authYn").val() !== "Y") {
+                alert("이메일 인증을 완료하세요.");
+                event.preventDefault();
+            }
+        });
+    });
+
+    // 이메일 형식 검증
+    function validateEmail(email) {
+        var regex = /^[A-Za-z0-9+_.-]+@([A-Za-z0-9.-]+\.[A-Za-z]{2,})$/;
+        return regex.test(email);
+    }
+
+    // 이메일 인증번호 보내기
+    function sendAuthCode() {
+        var email = $("#memberEmail").val();
+
+        if (email === "") {
+            alert("이메일을 입력해주세요.");
+            return;
+        } else if (!validateEmail(email)) {
+            alert("이메일 형식이 올바르지 않습니다.");
+            return;
+        } else {
+            $.ajax({
+                url: "/member/sendEmail",
+                type: "post",
+                dataType: "json",
+                data: { "email": email },
+                success: function(data) {
+                    alert("인증번호 발송");
+                    $("#sendCode").val(data);
+                    $("#authCodeDiv").css("display", "block");
+                },
+                error: function(xhr) {
+                    alert("알 수 없는 오류입니다.");
+                }
+            });
+        }
+    }
+
+    //인증하기
+    function confirmCode() {
+        var number1 = $("#authCode").val();
+        var number2 = $("#sendCode").val();
+
+        if (number1 === number2) {
+            alert("인증 되었습니다.");
+            $("#authYn").val("Y");
+            $("#authCodeDiv").css("display", "none");
+            $("#sendBtn").css("display", "none");
+            $("#memberEmail").prop("readonly",true);
+        } else {
+            alert("번호가 일치하지 않습니다.");
+        }
+    }
+  </script>
 </head>
 <body>
 <div class="container">
@@ -13,7 +85,9 @@
       <div class="card mt-5 shadow">
         <div class="card-body">
           <h3 class="card-title text-center">회원정보 수정</h3>
-          <form id="updateForm" th:object="${member}">
+          <form id="updateForm" th:action="@{/member/update}" th:object="${memberDto}" method="post">
+            <input type="hidden" id="sendCode">
+            <input type="hidden" id="authYn" value="Y">
             <!-- 아이디는 수정 불가 -->
             <div class="mb-3">
               <label for="memberId" class="form-label">아이디</label>
@@ -23,19 +97,35 @@
             <!-- 비밀번호 -->
             <div class="mb-3">
               <label for="memberPw" class="form-label">비밀번호</label>
-              <input type="password" class="form-control" id="memberPw" placeholder="새 비밀번호를 입력하세요.">
+              <input type="password" class="form-control" id="memberPw" name="memberPw" placeholder="새 비밀번호를 입력하세요.">
+              <p th:if="${#fields.hasErrors('memberPw')}" th:errors="*{memberPw}" class="text-danger"></p>
             </div>
 
             <!-- 이름 -->
             <div class="mb-3">
               <label for="memberNm" class="form-label">이름</label>
               <input type="text" class="form-control" id="memberNm" th:field="*{memberNm}" placeholder="이름을 입력하세요.">
+              <p th:if="${#fields.hasErrors('memberNm')}" th:errors="*{memberNm}" class="text-danger"></p>
             </div>
 
             <!-- 이메일 -->
             <div class="mb-3">
-              <label for="memberEmail" class="form-label">이메일</label>
-              <input type="email" class="form-control" id="memberEmail" th:field="*{memberEmail}" placeholder="이메일을 입력하세요." readonly>
+              <label for="memberEmail" class="form-label">이메일 (이메일을 변경할 시 인증을 해야합니다.)</label>
+              <div class="input-group">
+                <input type="email" class="form-control" id="memberEmail" th:field="*{memberEmail}" placeholder="이메일을 입력하세요.">
+                <button type="button" class="btn btn-outline-primary btn-sm" id="sendBtn" onclick="sendAuthCode()" style="display: none;">
+                인증번호
+                </button>
+              </div>
+            </div>
+
+            <div class="mb-3" id="authCodeDiv" style="display: none">
+              <label for="authCode" class="form-label">이메일 인증</label>
+              <div class="input-group mb-3">
+                <input type="text" class="form-control" name="authCode" id="authCode" placeholder="인증번호 입력">
+                <button type="button" class="btn btn-success" name="confirmBtn" id="confirmBtn" onclick="confirmCode()">확인</button>
+              </div>
+              <p th:if="${#fields.hasErrors('memberEmail')}" th:errors="*{memberEmail}" class="text-danger mt-1"></p>
             </div>
 
             <!-- 수정 버튼 -->
