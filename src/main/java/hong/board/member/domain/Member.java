@@ -1,9 +1,11 @@
 package hong.board.member.domain;
 
+import hong.board.board.domain.Board;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Getter
@@ -32,6 +34,9 @@ public class Member {
 
     @Enumerated(EnumType.STRING)        //역할 STRING 권장
     private MemberRole role;
+
+    //@OneToMany(mappedBy = "author", cascade = CascadeType.ALL, orphanRemoval = true)
+    //private List<Board> boardList; //사용자가 작성한 게시글 리스트
     
     //엔티티가 변경될 때 자동으로 갱신
     @PreUpdate

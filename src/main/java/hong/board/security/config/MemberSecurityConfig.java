@@ -42,7 +42,7 @@ public class MemberSecurityConfig {
         http
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/","/member/**","/css/**", "/js/**", "/images/**", "/favicon.ico").permitAll() // 해당 경로는 인증없이 접근 가능
-                        .requestMatchers("/").hasRole("USER") // ROLE이 USER인 경우에만 인증 가능 hasAuthority 는 ROLE_ 의 접두사를 빼고 비교
+                        .requestMatchers("/","/board/**").hasAuthority("USER") // ROLE이 USER인 경우에만 인증 가능 hasAuthority 는 ROLE_ 의 접두사를 빼고 비교
                         .anyRequest().authenticated() // 그 외 요청은 인증을 요구
                 )
                 .csrf(csrf -> csrf
