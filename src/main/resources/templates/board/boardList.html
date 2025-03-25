@@ -1,10 +1,116 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
+    <!-- JQUERY -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- TOAST GRID -->
+    <link rel="stylesheet" href="https://uicdn.toast.com/grid/latest/tui-grid.css">
+    <script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
+    <style>
+        /* 그리드 컨테이너를 화면 가운데로 정렬 */
+        .tui-grid-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh; /* 화면 높이를 100%로 설정 */
+            width: 100%;
+        }
+
+        /* 그리드 크기 설정 */
+        #grid {
+            width: 80%; /* 그리드 너비 설정 (필요에 따라 수정 가능) */
+            height: 70%; /* 그리드 높이 설정 (필요에 따라 수정 가능) */
+        }
+    </style>
 </head>
+<script type="text/javascript">
+    //초기 그리드랑 검색 그리드 나누기 위해 전역변수 설정
+    let grid;
+
+    $(document).ready(function (){
+        loadGrid();
+    });
+
+    //그리드 조회
+    function loadGrid() {
+        $.ajax({
+            url: "/board/boardList/data",
+            method: "GET",
+            data: {"title"   : $("#searchTitle").val(),
+                   "content" : $("#searchContent").val(),
+                   "authorId": $("#searchAuthorId").val()
+            },
+            success: function(data) {
+                // 데이터를 내림차순으로 정렬 (boardId 기준으로)
+                data.sort(function(a, b) {
+                    return b.boardId - a.boardId; // 내림차순 정렬
+                });
+
+                //게시판 목록 처음 조회 시
+                if(!grid) {
+                    grid = new tui.Grid({
+                        el: document.getElementById("grid"),
+                        data: data,
+                        columns: [
+                            { header: 'ID', name: 'boardId', width: 50, align: 'center', hidden:1 },
+                            { header: '제목', name: 'title', width: 300, align: 'left' },
+                            { header: '작성자', name: 'authorId', width: 100, align: 'center' },
+                            { header: '작성일', name: 'createDate', width: 150, align: 'center', dateFormat: 'yyyy-MM-dd' },
+                            { header: '수정일', name: 'updateDate', width: 150, align: 'center', dateFormat: 'yyyy-MM-dd' },
+                        ],
+                        rowHeaders: ['rowNum'], // 행 번호 추가
+                    });
+
+                    grid.on('click', function(e) {
+                        if(e.columnName == 'title' && e.targetType == 'cell') {
+                            const rowKey = e.rowKey;
+                            const rowData = grid.getRow(rowKey);
+
+                            boardDetail(rowData.boardId);
+                        }
+                    });
+                } else {
+                    grid.resetData(data); //기존 그리드의 검색으로 조회한 데이터 갱신
+                }
+            },
+            error: function(xhr, status, error) {
+                alert("오류");
+            }
+        });
+    }
+    //게시물 상세
+    function boardDetail(id) {
+        //상세페이지로 이동
+        window.location.href = '/board/boardDetail/' + id;
+    }
+
+    //게시물 검색
+    function searchList() {
+        loadGrid();
+    }
+</script>
 <body>
-게시판 리스트
+<div class="container mt-4">
+    <!-- 검색 조건 입력 -->
+    <div class="row mb-3">
+        <div class="col-md-4">
+            <input type="text" id="searchTitle" class="form-control" placeholder="제목 검색">
+        </div>
+        <div class="col-md-4">
+            <input type="text" id="searchContent" class="form-control" placeholder="내용 검색">
+        </div>
+        <div class="col-md-4">
+            <input type="text" id="searchAuthorId" class="form-control" placeholder="작성자 검색">
+        </div>
+        <div class="col-md-2">
+            <button class="btn btn-primary" onclick="searchList()">검색</button>
+        </div>
+    </div>
+
+    <!-- 그리드 -->
+    <div id="grid"></div>
+</div>
 </body>
 </html>
