@@ -86,7 +86,7 @@ public class MemberController {
         //회원 찾기
         Member member = memberService.findByMemberId(memberId);
         model.addAttribute("memberDto", member);
-        return "/member/updateForm";
+        return "member/updateForm";
     }
 
     //회원수정

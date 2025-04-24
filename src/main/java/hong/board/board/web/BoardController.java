@@ -24,10 +24,10 @@ public class BoardController {
     @GetMapping("/boardList")
     public String boardList() {
 
-        return "/board/boardList";
+        return "board/boardList";
     }
 
-    //게시물 목록 조회
+    //게시물 목록 조회(검색조건포함)
     @GetMapping("/boardList/data")
     @ResponseBody
     public List<BoardDto> getSearchBoardList(@RequestParam(name = "title", required = false) String title,
