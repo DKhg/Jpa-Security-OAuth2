@@ -28,7 +28,7 @@ public class MemberController {
     @GetMapping("/joinForm")
     public String joinForm(MemberDto memberDto, Model model) {
 
-        return "/member/joinForm";
+        return "member/joinForm";
     }
 
     //회원가입
