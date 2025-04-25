@@ -45,6 +45,8 @@ public class MemberSecurityConfig {
                         .requestMatchers("/","/board/**").hasAuthority("USER") // ROLE이 USER인 경우에만 인증 가능 hasAuthority 는 ROLE_ 의 접두사를 빼고 비교
                         .anyRequest().authenticated() // 그 외 요청은 인증을 요구
                 )
+                .requiresChannel(auth -> auth.anyRequest().requiresInsecure()
+                )
                 .csrf(csrf -> csrf
                         .ignoringRequestMatchers("/member/sendEmail", "/member/idCheck") // /member/sendEmail 경로는 CSRF 보호를 비활성화
                 )
