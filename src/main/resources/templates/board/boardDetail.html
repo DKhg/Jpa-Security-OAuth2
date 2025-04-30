@@ -3,6 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <title>게시물 상세</title>
+  <!-- Dropzone CSS & JS -->
+  <link rel="stylesheet" href="https://unpkg.com/dropzone@5/dist/min/dropzone.min.css" />
+  <script src="https://unpkg.com/dropzone@5/dist/min/dropzone.min.js"></script>
   <!-- JQUERY -->
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <!-- CSS -->
@@ -27,7 +30,84 @@
       margin-bottom: 10px;
     }
   </style>
-  <script type="text/javascript">
+  <!--th:inline : 객체, 리스트를 JSON 넘길 때 깨지지않고 알맞게 변환해서 넘겨줌 -->
+  <script th:inline="javascript">
+
+      //선택한 첨부파일 리스트
+      let selectedFiles = [];
+
+      Dropzone.autoDiscover = false;
+
+      $(document).ready(function() {
+          //작성자인지 여부
+          var isAuthor = true; //[[${'Y' == authorYn}]];
+
+          //작성자일때
+          if(isAuthor) {
+
+              //기존에 저장된 파일들
+              let serverFiles = [[${serverFilesJSon}]];
+
+              const myDropzone = new Dropzone(document.body, { // body 전체를 dropzone, 하지만 드래그 금지
+              url: "#", // 실제 전송은 안 함
+              clickable: "#fileSelectBtn",
+              autoProcessQueue: false,
+              previewsContainer: false,
+              disablePreviews: true,
+              init: function () {
+                  this.on("addedfile", function (file) {
+                      //선택한 파일을 리스트에 담아주기
+                      selectedFiles.push(file);
+                      updateFileList();
+                  });
+                  this.on("removedfile", function (file) {
+                      //제거된 파일이름과 selectedFiles 담긴 파일이름이 동일한 것을 찾아 배열에서 제거
+                      selectedFiles = selectedFiles.filter(f => f.name !== file.name);
+                  });
+
+                  //서버 파일을 dropzone 영역에 등록
+                  serverFiles.forEach(file => {
+                      const mockFile = {
+                          fileId: file.fileId,
+                          fileName: file.fileName,
+                          filePath: file.filePath,
+                          isServerFile: true
+                      };
+                      this.emit("addedfile", mockFile);
+                      //selectedFiles.push(mockFile); //리스트에도 추가
+                      //updateFileList(); //리스트 갱신
+                  });
+              }
+          });
+          }
+
+      });
+
+      //선택된 첨부파일 리스트 생성, 갱신
+      function updateFileList() {
+
+          const list = $("#fileList");
+
+          //다시 그리기 위해서 빈 리스트 설정
+          list.empty();
+
+          //담아둔 file 하나씩 리스트로 그려주기
+          selectedFiles.forEach((file, index) => {
+              list.append(`<li class="list-group-item d-flex justify-content-between align-items-center">
+                  ${file.name}
+                  <button type="button" class="btn btn-sm btn-danger" onclick="removeFile(${index})">삭제</button>
+                </li>
+              `);
+          });
+      }
+
+      //첨부파일 삭제
+      function removeFile(index) {
+          //요소 삭제
+          selectedFiles.splice(index, 1);
+          updateFileList();
+      }
+
       //게시물 수정
       function updateBtn() {
 
@@ -86,6 +166,12 @@
             }
         });
       }
+
+      //파일 삭제
+      function deleteFile(fileId) {
+          alert(fileId);
+      }
+
   </script>
 </head>
 <body>
@@ -114,21 +200,32 @@
               <textarea th:field="*{content}" class="form-control" th:attr="readonly=${authorYn != 'Y'}"></textarea>
             </div>
 
+            <!-- 파일 첨부  + Dropzone 영역 -->
+            <div class="form-group mb-4" th:if="${authorYn.equals('Y')}">
+              <i class="bi bi-paperclip"></i>파일첨부
+              <button id="fileSelectBtn" type="button" class="btn btn-sm btn-secondary ms-2">파일 선택</button>
+              <!-- 파일 리스트 보여줄 곳 -->
+              <ul id="fileList" class="list-group mt-3"></ul>
+            </div>
+
             <!-- 첨부파일 리스트 -->
-            <div class="mb-4">
+            <div class="mb-4" th:if="${authorYn.equals('N')}">
               <h6 class="mb-3"><i class="bi bi-paperclip"></i> 첨부파일</h6>
               <!-- 파일이 없을 때 -->
               <p th:if="${boardDto.fileList.size() == 0}">
                 &nbsp;&nbsp;&nbsp;&nbsp;첨부파일이 존재하지 않습니다.
               </p>
               <!-- 파일이 있을 때 -->
-              <ul class="list-group list-group-flush" th:if="${boardDto.fileList.size() > 0}">
-                <li class="list-group-item" th:each="file : ${boardDto.fileList}">
-                  <i class="bi bi-file-earmark text-primary me-2"></i>
+              <ul id="fileUl" class="list-group list-group-flush" th:if="${boardDto.fileList.size() > 0}">
+                <li th:id="'file-'+ ${file.fileId}" class="list-group-item d-flex justify-content-between align-items-center" th:each="file : ${boardDto.fileList}">
+                  <i class="text-primary me-2"></i>
                   <a th:href="@{/file/{fileId}/download(fileId=${file.fileId})}"
                      th:text="${file.fileName}"
                      class="text-primary text-decoration-underline"
                      download></a>
+                  <button type="button" class="btn btn-sm btn-outline-danger" th:if="${authorYn == 'Y'}" th:onclick="deleteFile([[${file.fileId}]])">
+                    삭제
+                  </button>
                 </li>
               </ul>
             </div>

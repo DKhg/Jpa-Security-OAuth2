@@ -1,5 +1,7 @@
 package hong.board.board.web;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import hong.board.board.domain.BoardService;
 import hong.board.member.domain.Member;
 import hong.board.security.auth.MemberPrincipalDetails;
@@ -42,25 +44,20 @@ public class BoardController {
 
     //게시물 상세 조회
     @GetMapping("/boardDetail/{boardId}")
-    public String getBoardDetail(@PathVariable("boardId") Long boardId, Principal principal, Model model) {
+    public String getBoardDetail(@PathVariable("boardId") Long boardId, Principal principal, Model model) throws JsonProcessingException {
         BoardDto boardDto = boardService.findByBoardId(boardId);
-        //사용자 아이디
-        String memberId = principal.getName();
-        //게시물 작성자 아이디
-        String authorId = boardDto.getAuthorId();
-        //사용자와 게시물 작성자 일치 여부
-        String authorYn = "";
 
-        //일치
-        if (memberId.equals(authorId)) {
-            authorYn = "Y";
-            //불일치
-        } else {
-            authorYn = "N";
+        //작성자인지 체크
+        boolean isAuthor = boardDto.getAuthorId().equals(principal.getName());
+        model.addAttribute("boardDto", boardDto);
+        model.addAttribute("authorYn", isAuthor ? 'Y' : 'N');
+
+        if(isAuthor) {
+            //작성자일때 JSON 형태로 파일리스트 넘기기 (Dropzone 용)
+            String serverFileJson = new ObjectMapper().writeValueAsString(boardDto.getFileList());
+            model.addAttribute("serverFilesJSon", serverFileJson);
         }
 
-        model.addAttribute("boardDto", boardDto);
-        model.addAttribute("authorYn", authorYn);
         return "board/boardDetail";
     }
 

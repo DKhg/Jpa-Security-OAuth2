@@ -63,23 +63,50 @@
       Dropzone.autoDiscover = false;
       $(document).ready(function () {
           // Dropzone 초기화
-          const myDropzone = new Dropzone("#dropzoneArea", {
+          const myDropzone = new Dropzone(document.body, { // body 전체를 dropzone, 하지만 드래그 금지
               url: "#", // 실제 전송은 안 함
+              clickable: "#fileSelectBtn",
               autoProcessQueue: false,
-              addRemoveLinks: true,
-              dictDefaultMessage: "파일을 여기에 드래그하거나 클릭하세요",
+              previewsContainer: false,
+              disablePreviews: true,
               init: function () {
                   this.on("addedfile", function (file) {
-                      //Dropzone 선택된 파일을 리스트에 담아주기
+                      //선택한 파일을 리스트에 담아주기
                       selectedFiles.push(file);
+                      updateFileList();
                   });
                   this.on("removedfile", function (file) {
-                      //Dropzone 제거된 파일이름과 selectedFiles 담긴 파일이름이 동일한 것을 찾아 배열에서 제거
+                      //제거된 파일이름과 selectedFiles 담긴 파일이름이 동일한 것을 찾아 배열에서 제거
                       selectedFiles = selectedFiles.filter(f => f.name !== file.name);
                   });
               }
           });
       });
+
+      //선택된 첨부파일 리스트 생성, 갱신
+      function updateFileList() {
+
+          const list = $("#fileList");
+
+          //다시 그리기 위해서 빈 리스트 설정
+          list.empty();
+
+          //담아둔 file 하나씩 리스트로 그려주기
+          selectedFiles.forEach((file, index) => {
+              list.append(`<li class="list-group-item d-flex justify-content-between align-items-center">
+                  ${file.name}
+                  <button type="button" class="btn btn-sm btn-danger" onclick="removeFile(${index})">삭제</button>
+                </li>
+              `);
+          });
+      }
+
+      //첨부파일 삭제
+      function removeFile(index) {
+          //요소 삭제
+          selectedFiles.splice(index, 1);
+          updateFileList();
+      }
 
       //게시물 등록
       function saveBoard() {
@@ -156,11 +183,10 @@
 
         <!-- 파일 첨부  + Dropzone 영역 -->
         <div class="form-group">
-          <label class="font-weight-bold">
-            <i class="bi bi-paperclip"></i> 파일첨부
-          </label>
-          <div id="dropzoneArea" class="dropzone border rounded p-3 bg-white text-center">
-          </div>
+            <i class="bi bi-paperclip"></i>파일첨부
+            <button id="fileSelectBtn" type="button" class="btn btn-sm btn-secondary ms-2">파일 선택</button>
+          <!-- 파일 리스트 보여줄 곳 -->
+          <ul id="fileList" class="list-group mt-3"></ul>
         </div>
 
         <div class="form-group">

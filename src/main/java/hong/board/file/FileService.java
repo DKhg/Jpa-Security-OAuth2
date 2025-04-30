@@ -50,7 +50,7 @@ public class FileService {
                 File file = File.builder()
                         .board(board)
                         .fileName(originalFilename)
-                        .filePath(savedFilename)
+                        .filePath(uploadPath + "/" + savedFilename)
                         .build();
                 fileRepository.save(file);
 
