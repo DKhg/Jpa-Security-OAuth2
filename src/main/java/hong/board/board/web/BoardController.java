@@ -50,11 +50,11 @@ public class BoardController {
         String authorId = boardDto.getAuthorId();
         //사용자와 게시물 작성자 일치 여부
         String authorYn = "";
-        
+
         //일치
-        if(memberId.equals(authorId)) {
+        if (memberId.equals(authorId)) {
             authorYn = "Y";
-        //불일치
+            //불일치
         } else {
             authorYn = "N";
         }
@@ -71,11 +71,11 @@ public class BoardController {
 
         Map<String, Object> resultMap = new HashMap<>();
 
-        try { 
+        try {
             boardService.updateBoard(boardId, boardDto);
             resultMap.put("status", "success");
             resultMap.put("message", "게시물 수정 완료");
-        } catch(Exception e) {
+        } catch (Exception e) {
             resultMap.put("status", "error");
             resultMap.put("message", "수정 오류: " + e.getMessage());
         }
@@ -94,7 +94,7 @@ public class BoardController {
             boardService.deleteBoard(boardId);
             resultMap.put("status", "success");
             resultMap.put("message", "게시물 삭제 완료");
-        } catch(Exception e) {
+        } catch (Exception e) {
             resultMap.put("status", "error");
             resultMap.put("message", "삭제 오류: " + e.getMessage());
         }
@@ -117,7 +117,7 @@ public class BoardController {
     //게시물 등록
     @PostMapping("/saveBoard")
     @ResponseBody
-    public Map<String, Object> saveBoard(@ModelAttribute BoardDto boardDto, @RequestParam("file") List<MultipartFile> files) throws Exception {
+    public Map<String, Object> saveBoard(@ModelAttribute BoardDto boardDto, @RequestParam(name = "file", required = false) List<MultipartFile> files) throws Exception {
 
         Map<String, Object> resultMap = new HashMap<>();
 

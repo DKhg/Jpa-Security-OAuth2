@@ -88,12 +88,14 @@
           var content = $("#content").val();
 
           //Dropzone 파일 리스트를 formData 에 담기
-          selectedFiles.forEach(function(file) {
-              if(file && file.size > 0 && file.name) {
-                  formData.append('file', file);
-              }
-          });
-          debugger;
+          if(selectedFiles.length > 0) {
+              selectedFiles.forEach(function(file) {
+                  if(file && file.size > 0 && file.name) {
+                      formData.append('file', file);
+                  }
+              });
+          }
+
           //유효성 검사
           if(title.trim() == ''){
             alert("제목을 작성해주세요");
@@ -112,8 +114,12 @@
               contentType: false, //브라우저가 직접 적절한 Content-Type 설정하게 함
               processData: false, //FormData 있는 그대로 전송 multipart/form-data 전송할 수 있게 함
               success: function(data) {
-                  alert("게시물이 성공적으로 등록되었습니다.");
-                  window.location.href = '/board/boardList';
+                  if(data.status == 'success'){
+                      alert(data.message);
+                      window.location.href = '/board/boardList';
+                  } else {
+                      alert(data.message);
+                  }
               },
               error: function(xhr) {
                   alert('게시물 등록에 실패했습니다.');

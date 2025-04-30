@@ -39,7 +39,7 @@ public class BoardService {
                     boardDto.setUpdateDate(board.getUpdateDate());
                     boardDto.setContent(board.getContent());
                     boardDto.setDelYn(board.getDelYn());
-                    boardDto.setFileList(board.getFileList()); //순환 참조(양방향)가 일어나 File 객체에 @JsonIgnore 어노테이션 추가 
+                    boardDto.setFileList(board.getFileList()); //순환 참조(양방향)가 일어나 File 객체에 @JsonIgnore 어노테이션 추가
                     return boardDto;
                 })
                 .collect(Collectors.toList());
@@ -111,12 +111,10 @@ public class BoardService {
         boardRepository.save(board);
         
         //첨부파일 저장
-        if(!files.isEmpty()) {
-            try {
-                List<File> fileList = fileService.saveFiles(files, board);
-            } catch (IOException e) {
-                throw new RuntimeException("파일 저장 중 오류가 발생했습니다.", e);
-            }
+        try {
+            List<File> fileList = fileService.saveFiles(files, board);
+        } catch (IOException e) {
+            throw new RuntimeException("파일 저장 중 오류가 발생했습니다.", e);
         }
     }
 }
