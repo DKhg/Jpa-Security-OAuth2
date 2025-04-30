@@ -2,65 +2,123 @@
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>게시판</title>
     <!-- JQUERY -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <!-- TOAST GRID -->
     <link rel="stylesheet" href="https://uicdn.toast.com/grid/latest/tui-grid.css">
     <script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
+    <!-- dayjs (날짜 변환용) -->
+    <script src="https://unpkg.com/dayjs@1/dayjs.min.js"></script>
+    <!-- Bootstrap 4.5 CDN for styling -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        /* 그리드 컨테이너를 화면 가운데로 정렬 */
-        .tui-grid-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh; /* 화면 높이를 100%로 설정 */
-            width: 100%;
+        /* 페이지와 그리드 컨테이너 스타일 */
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f8f9fa;
         }
+
+        .container {
+            max-width: 1200px;
+            margin-top: 20px;
+        }
+
+        .row-header {
+            font-size: 1.25rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
 
         /* 그리드 크기 설정 */
         #grid {
-            width: 80%; /* 그리드 너비 설정 (필요에 따라 수정 가능) */
-            height: 70%; /* 그리드 높이 설정 (필요에 따라 수정 가능) */
+            width: 100%; /* 전체 너비 */
+            height: 100%; /* 전체 높이 */
         }
+
+        /* 검색창 디자인 */
+        .search-container {
+            margin-bottom: 20px;
+        }
+
+        .search-container input {
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+
+        /* 버튼 디자인 */
+        .btn-primary {
+            background-color: #007bff;
+            border-color: #007bff;
+            width: 50%; /* 버튼 가로 크기 100%로 설정 */
+        }
+
     </style>
 </head>
 <script type="text/javascript">
-    //초기 그리드랑 검색 그리드 나누기 위해 전역변수 설정
     let grid;
 
     $(document).ready(function (){
         loadGrid();
+
+        $("input").keydown(function(event) {
+            if(event.keyCode == 13) {
+                searchList();
+            }
+        });
     });
 
-    //그리드 조회
     function loadGrid() {
         $.ajax({
             url: "/board/boardList/data",
             method: "GET",
-            data: {"title"   : $("#searchTitle").val(),
-                   "content" : $("#searchContent").val(),
-                   "authorId": $("#searchAuthorId").val()
+            data: {
+                "title"   : $("#searchTitle").val(),
+                "content" : $("#searchContent").val(),
+                "authorId": $("#searchAuthorId").val()
             },
             success: function(data) {
-                // 데이터를 내림차순으로 정렬 (boardId 기준으로)
+                // 데이터를 내림차순으로 정렬
                 data.sort(function(a, b) {
-                    return b.boardId - a.boardId; // 내림차순 정렬
+                    return b.boardId - a.boardId;
                 });
 
-                //게시판 목록 처음 조회 시
+                // 게시판 그리드 생성 또는 데이터 갱신
                 if(!grid) {
                     grid = new tui.Grid({
                         el: document.getElementById("grid"),
                         data: data,
                         columns: [
-                            { header: 'ID', name: 'boardId', width: 50, align: 'center', hidden:1 },
+                            { header: 'ID', name: 'boardId', width: 50, align: 'center', hidden: 1 },
                             { header: '제목', name: 'title', width: 300, align: 'left' },
                             { header: '작성자', name: 'authorId', width: 100, align: 'center' },
-                            { header: '작성일', name: 'createDate', width: 150, align: 'center', dateFormat: 'yyyy-MM-dd' },
-                            { header: '수정일', name: 'updateDate', width: 150, align: 'center', dateFormat: 'yyyy-MM-dd' },
+                            { header: '작성일',
+                              name: 'createDate',
+                              width: 150,
+                              align: 'center',
+                              formatter: ({ value }) => { return value ? dayjs(value).format('YYYY-MM-DD') : '';}
+                            },
+                            { header: '수정일',
+                              name: 'updateDate',
+                              width: 150,
+                              align: 'center',
+                              formatter: ({ value }) => { return value ? dayjs(value).format('YYYY-MM-DD') : '';}
+                            },
+                            { header: '첨부파일',
+                              name: 'fileList',
+                              width: 150,
+                              align: 'center',
+                              formatter: function({value}) {
+                                    if(!value || value.length == 0) {
+                                        return 'X';
+                                    } else {
+                                        return 'O';
+                                    }
+                              }
+                            },
                         ],
-                        rowHeaders: ['rowNum'], // 행 번호 추가
+                        rowHeaders: ['rowNum'],
                     });
 
                     grid.on('click', function(e) {
@@ -72,17 +130,17 @@
                         }
                     });
                 } else {
-                    grid.resetData(data); //기존 그리드의 검색으로 조회한 데이터 갱신
+                    grid.resetData(data); // 기존 그리드 갱신
                 }
             },
             error: function(xhr, status, error) {
-                alert("오류");
+                alert("오류가 발생했습니다.");
             }
         });
     }
+
     //게시물 상세
     function boardDetail(id) {
-        //상세페이지로 이동
         window.location.href = '/board/boardDetail/' + id;
     }
 
@@ -90,27 +148,46 @@
     function searchList() {
         loadGrid();
     }
+
+    //게시물 등록
+    function writeBoard() {
+        window.location.href = '/board/writeBoard'
+    }
+
 </script>
 <body>
-<div class="container mt-4">
+<div class="container">
+    <div class="row">
+        <div class="col-md-12 row-header">
+            <h4>게시판 목록</h4>
+        </div>
+    </div>
+
     <!-- 검색 조건 입력 -->
-    <div class="row mb-3">
-        <div class="col-md-4">
+    <div class="row search-container" style="display: ruby;">
+        <div class="col-md-3">
+            <label for="searchTitle"></label>
             <input type="text" id="searchTitle" class="form-control" placeholder="제목 검색">
         </div>
-        <div class="col-md-4">
+        <div class="col-md-3">
+            <label for="searchContent"></label>
             <input type="text" id="searchContent" class="form-control" placeholder="내용 검색">
         </div>
-        <div class="col-md-4">
+        <div class="col-md-3">
+            <label for="searchAuthorId"></label>
             <input type="text" id="searchAuthorId" class="form-control" placeholder="작성자 검색">
         </div>
-        <div class="col-md-2">
+        <div class="col-md-3">
             <button class="btn btn-primary" onclick="searchList()">검색</button>
         </div>
     </div>
 
     <!-- 그리드 -->
     <div id="grid"></div>
+    <!-- 게시물 등록 버튼 -->
+    <div class="d-flex justify-content-end mt-3">
+        <button class="btn btn-success" style="width: 150px;" onclick="writeBoard()">게시물 등록</button>
+    </div>
 </div>
 </body>
 </html>

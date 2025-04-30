@@ -51,7 +51,7 @@ public class MemberSecurityConfig {
                         .requiresSecure()
                 )*/
                 .csrf(csrf -> csrf
-                        .ignoringRequestMatchers("/member/sendEmail", "/member/idCheck") // /member/sendEmail 경로는 CSRF 보호를 비활성화
+                        .ignoringRequestMatchers("/member/sendEmail", "/member/idCheck", "/board/**") // /member/sendEmail 경로는 CSRF 보호를 비활성화
                 )
                 .formLogin(form -> form
                         .loginPage("/loginPage") // 로그인 페이지 설정
