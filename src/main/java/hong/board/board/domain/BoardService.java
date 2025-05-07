@@ -37,6 +37,7 @@ public class BoardService {
                     boardDto.setAuthorId(board.getAuthor().getMemberId());
                     boardDto.setCreateDate(board.getCreateDate());
                     boardDto.setUpdateDate(board.getUpdateDate());
+                    boardDto.setViewCount(board.getViewCount());
                     boardDto.setContent(board.getContent());
                     boardDto.setDelYn(board.getDelYn());
                     boardDto.setFileList(board.getFileList()); //순환 참조(양방향)가 일어나 File 객체에 @JsonIgnore 어노테이션 추가
@@ -47,8 +48,12 @@ public class BoardService {
 
     //게시물 상세 조회
     public BoardDto findByBoardId(Long boardId) {
+        //조회수 증가
+        boardRepository.incrementViewCount(boardId);
+        
+        //게시물 조회
         Board board = boardRepository.findByBoardId(boardId);
-
+        
         if (board == null) {
             throw new RuntimeException("게시물을 찾을 수 없습니다.");
         }
@@ -60,7 +65,8 @@ public class BoardService {
     }
 
     //게시물 수정
-    public void updateBoard(Long boardId, BoardDto boardDto) {
+    @Transactional
+    public void updateBoard(Long boardId, BoardDto boardDto, List<MultipartFile> files) {
 
         //업데이트 되지 않는 부분을 조회하기 위함
         Board board = boardRepository.findByBoardId(boardId);
@@ -74,9 +80,17 @@ public class BoardService {
 
 
         boardRepository.save(board);
+
+        //첨부파일 저장
+        try {
+            List<File> fileList = fileService.saveFiles(files, board);
+        } catch (IOException e) {
+            throw new RuntimeException("파일 저장 중 오류가 발생했습니다.", e);
+        }
     }
 
     //게시물 삭제
+    @Transactional
     public void deleteBoard(Long boardId) {
 
         //업데이트 되지 않는 부분을 조회하기 위함

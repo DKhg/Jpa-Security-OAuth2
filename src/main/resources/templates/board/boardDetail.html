@@ -2,6 +2,8 @@
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8">
+  <meta name="_csrf" th:content="${_csrf.token}">
+  <meta name="_csrf_header" th:content="${_csrf.headerName}">
   <title>게시물 상세</title>
   <!-- Dropzone CSS & JS -->
   <link rel="stylesheet" href="https://unpkg.com/dropzone@5/dist/min/dropzone.min.css" />
@@ -35,18 +37,25 @@
 
       //선택한 첨부파일 리스트
       let selectedFiles = [];
+      //삭제할 첨부파일아이디 리스트
+      let deletedFileIds = [];
+
+      //csrf 토큰
+      var csrfToken = $("meta[name='_csrf']").attr("content");
+      var csrfHeader = $("meta[name='_csrf_header']").attr("content");
 
       Dropzone.autoDiscover = false;
 
       $(document).ready(function() {
-          //작성자인지 여부
-          var isAuthor = true; //[[${'Y' == authorYn}]];
 
+          //작성자인지 여부
+          var isAuthor = [[${authorYn}]];
           //작성자일때
-          if(isAuthor) {
+          if(isAuthor == "Y" && $("#fileSelectBtn").length > 0) {
 
               //기존에 저장된 파일들
               let serverFiles = [[${serverFilesJSon}]];
+              serverFiles = JSON.parse(serverFiles);
 
               const myDropzone = new Dropzone(document.body, { // body 전체를 dropzone, 하지만 드래그 금지
               url: "#", // 실제 전송은 안 함
@@ -61,21 +70,20 @@
                       updateFileList();
                   });
                   this.on("removedfile", function (file) {
-                      //제거된 파일이름과 selectedFiles 담긴 파일이름이 동일한 것을 찾아 배열에서 제거
-                      selectedFiles = selectedFiles.filter(f => f.name !== file.name);
+
                   });
 
                   //서버 파일을 dropzone 영역에 등록
                   serverFiles.forEach(file => {
                       const mockFile = {
+                          name: file.fileName, //반드시 name 추가해야 undefined 라고 안뜸
                           fileId: file.fileId,
                           fileName: file.fileName,
                           filePath: file.filePath,
                           isServerFile: true
                       };
+                      //addedfile 이벤트를 강제로 실행하여 서버파일을 리스트로 뿌려줌
                       this.emit("addedfile", mockFile);
-                      //selectedFiles.push(mockFile); //리스트에도 추가
-                      //updateFileList(); //리스트 갱신
                   });
               }
           });
@@ -103,31 +111,75 @@
 
       //첨부파일 삭제
       function removeFile(index) {
-          //요소 삭제
-          selectedFiles.splice(index, 1);
-          updateFileList();
+          confirm("정말 삭제하시겠습니까?");
+
+          const file = selectedFiles[index];
+
+          //서버파일 삭제
+          if(file && file.fileId) {
+              $.ajax({
+                  url: '/file/deleteFile/' + file.fileId,
+                  type: "POST",
+                  data: { fileId : file.fileId },
+                  beforeSend: function(xhr) {
+                      xhr.setRequestHeader(csrfHeader, csrfToken);
+                  },
+                  success: function(data) {
+                      if(data.status == 'success'){
+                          alert(data.message);
+                          //화면의 리스트에서도 제거
+                          selectedFiles = selectedFiles.filter(f => f.fileId !== file.fileId);
+                          updateFileList();
+                      } else {
+                          alert(data.message);
+                      }
+                  },
+                  error: function(xhr) {
+                      alert('파일 삭제에 실패했습니다.');
+                  }
+              });
+          } else {
+              //서버 파일이 아닌 요소 삭제
+              selectedFiles.splice(index, 1);
+              updateFileList();
+          }
+
+
       }
 
       //게시물 수정
       function updateBtn() {
-
+        var formData = new FormData($("#detailForm")[0]);
         var boardId = [[${boardDto.boardId}]];
         var title = $("#title").val();
         var content = $("#content").val();
 
-        if(title == '' || content == '') {
-          alert("제목이나 내용을 입력해주세요");
-          return;
+        //Dropzone 파일 리스트를 formData 에 담기
+        if(selectedFiles.length > 0) {
+            selectedFiles.forEach(function(file) {
+              if(file && file.size > 0 && file.name) {
+                formData.append('file',file);
+              }
+            });
         }
+
+        //유효성 검사
+          if(title.trim() == ''){
+            alert("제목을 작성해주세요");
+            $("#title").focus();
+            return;
+          } else if(content.trim() == '') {
+            alert("내용을 작성해주세요");
+            $("#content").focus();
+            return;
+          }
 
         $.ajax({
             url: '/board/updateBoard/' + boardId,
             type: 'POST',
-            contentType : "application/json",
-            dataType : "json",
-            data: JSON.stringify({ title : title,
-                                   content : content
-            }),
+            data: formData,
+            contentType: false, //브라우저가 직접 적절한 Content-Type 설정하게 함
+            processData: false, //FormData 있는 그대로 전송 multipart/form-data 전송할 수 있게 함
             success: function(data) {
                 //성공
                 if(data.status == 'success'){
@@ -175,7 +227,7 @@
   </script>
 </head>
 <body>
-<form th:object="${boardDto}">
+<form id="detailForm">
   <div class="container">
     <div class="row justify-content-center">
       <div class="col-md-8">
@@ -185,23 +237,27 @@
             <!-- 게시물 정보 -->
             <div class="mb-3">
               <label class="form-label"><strong>제목</strong></label>
-              <input type="text" th:field="*{title}" class="form-control" th:attr="readonly=${authorYn != 'Y'}"/>
+              <input type="text" id="title" th:name="title" th:value="${boardDto.title}" class="form-control" th:attr="readonly=${authorYn != 'Y'}"/>
             </div>
 
             <div class="mb-3 row">
               <div class="col-md-6">
                 <label class="form-label"><strong>작성자</strong></label>
-                <input type="text" th:field="*{authorId}" class="form-control" readonly />
+                <input type="text" th:name="authorId" th:value="${boardDto.authorId}" class="form-control" readonly />
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label"><strong>조회수</strong></label>
+                <input type="text" th:value="${boardDto.viewCount}" class="form-control" readonly />
               </div>
             </div>
 
             <div class="mb-3">
               <label class="form-label"><strong>내용</strong></label>
-              <textarea th:field="*{content}" class="form-control" th:attr="readonly=${authorYn != 'Y'}"></textarea>
+              <textarea id="content" th:name="content" th:text="${boardDto.content}" class="form-control" th:attr="readonly=${authorYn != 'Y'}"></textarea>
             </div>
-
             <!-- 파일 첨부  + Dropzone 영역 -->
-            <div class="form-group mb-4" th:if="${authorYn.equals('Y')}">
+            <div class="form-group mb-4" th:if="${authorYn == 'Y'}">
               <i class="bi bi-paperclip"></i>파일첨부
               <button id="fileSelectBtn" type="button" class="btn btn-sm btn-secondary ms-2">파일 선택</button>
               <!-- 파일 리스트 보여줄 곳 -->
@@ -217,15 +273,12 @@
               </p>
               <!-- 파일이 있을 때 -->
               <ul id="fileUl" class="list-group list-group-flush" th:if="${boardDto.fileList.size() > 0}">
-                <li th:id="'file-'+ ${file.fileId}" class="list-group-item d-flex justify-content-between align-items-center" th:each="file : ${boardDto.fileList}">
+                <li th:id="'file-'+ ${file.fileId}" class="list-group-item d-flex align-items-center" th:each="file : ${boardDto.fileList}">
                   <i class="text-primary me-2"></i>
                   <a th:href="@{/file/{fileId}/download(fileId=${file.fileId})}"
                      th:text="${file.fileName}"
                      class="text-primary text-decoration-underline"
                      download></a>
-                  <button type="button" class="btn btn-sm btn-outline-danger" th:if="${authorYn == 'Y'}" th:onclick="deleteFile([[${file.fileId}]])">
-                    삭제
-                  </button>
                 </li>
               </ul>
             </div>
@@ -235,13 +288,13 @@
               <div class="col-md-6">
                 <label class="form-label"><strong>작성일</strong></label>
                 <label>
-                  <input type="text" th:field="*{createDate}" class="form-control" readonly />
+                  <input type="text" th:name="createDate" th:value="${boardDto.createDate}" class="form-control" readonly />
                 </label>
               </div>
               <div class="col-md-6">
                 <label class="form-label"><strong>수정일</strong></label>
                 <label>
-                  <input type="text" th:field="*{updateDate}" class="form-control" readonly />
+                  <input type="text" th:name="updateDate" th:value="${boardDto.updateDate}" class="form-control" readonly />
                 </label>
               </div>
             </div>

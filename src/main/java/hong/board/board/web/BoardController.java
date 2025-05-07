@@ -50,7 +50,7 @@ public class BoardController {
         //작성자인지 체크
         boolean isAuthor = boardDto.getAuthorId().equals(principal.getName());
         model.addAttribute("boardDto", boardDto);
-        model.addAttribute("authorYn", isAuthor ? 'Y' : 'N');
+        model.addAttribute("authorYn", isAuthor ? "Y" : "N");
 
         if(isAuthor) {
             //작성자일때 JSON 형태로 파일리스트 넘기기 (Dropzone 용)
@@ -64,12 +64,12 @@ public class BoardController {
     //게시물 수정
     @PostMapping("/updateBoard/{boardId}")
     @ResponseBody
-    public Map<String, Object> updateBoard(@PathVariable("boardId") Long boardId, @RequestBody BoardDto boardDto) {
+    public Map<String, Object> updateBoard(@PathVariable("boardId") Long boardId, @ModelAttribute BoardDto boardDto, @RequestParam(name = "file", required = false) List<MultipartFile> files) {
 
         Map<String, Object> resultMap = new HashMap<>();
 
         try {
-            boardService.updateBoard(boardId, boardDto);
+            boardService.updateBoard(boardId, boardDto, files);
             resultMap.put("status", "success");
             resultMap.put("message", "게시물 수정 완료");
         } catch (Exception e) {

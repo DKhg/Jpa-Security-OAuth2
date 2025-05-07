@@ -69,4 +69,9 @@ public class FileService {
                 .orElseThrow(() -> new IllegalArgumentException("해당 파일이 존재하지 않습니다."));
     }
 
+    //파일 삭제
+    public void deleteFile(Long fileId) throws IOException {
+        fileRepository.deleteById(fileId);
+    }
+
 }

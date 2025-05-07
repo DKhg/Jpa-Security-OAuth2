@@ -3,6 +3,7 @@ package hong.board.file;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import hong.board.board.domain.Board;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
