@@ -23,7 +23,7 @@ public class Board {
 
     @ManyToOne(fetch = FetchType.EAGER) //지연로딩(Lazy) : 실제로 데이터가 필요할 때 데이터를 가져오는 방식
     @JoinColumn(name = "author_id", referencedColumnName = "member_id", nullable = false)
-    private Member author;             //작성자
+    private Member author;              //작성자
 
     @Column(name = "title", nullable = false)
     private String title;               //게시물 제목
@@ -41,7 +41,7 @@ public class Board {
     private LocalDateTime updateDate;   //수정날짜
 
     @Column(name = "view_count", nullable = false)
-    private Integer viewCount = 0;          //조회수
+    private Integer viewCount = 0;      //조회수
 
     @OneToMany(mappedBy = "board", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<File> fileList;        //게시물에 첨부된 파일리스트(다대일관계)
