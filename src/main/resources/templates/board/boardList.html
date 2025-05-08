@@ -3,67 +3,102 @@
 <head>
     <meta charset="UTF-8">
     <title>게시판</title>
-    <!-- JQUERY -->
+
+    <!-- jQuery -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <!-- TOAST GRID -->
+
+    <!-- TOAST UI 필수 코드 스니펫 -->
+    <script src="https://uicdn.toast.com/tui.code-snippet/latest/tui-code-snippet.min.js"></script>
+
+    <!-- TOAST UI Pagination (Latest) -->
+    <link rel="stylesheet" href="https://uicdn.toast.com/tui.pagination/latest/tui-pagination.css">
+    <script src="https://uicdn.toast.com/tui.pagination/latest/tui-pagination.js"></script>
+
+    <!-- TOAST UI Grid (Latest) -->
     <link rel="stylesheet" href="https://uicdn.toast.com/grid/latest/tui-grid.css">
     <script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
+
     <!-- dayjs (날짜 변환용) -->
     <script src="https://unpkg.com/dayjs@1/dayjs.min.js"></script>
+
     <!-- Bootstrap 4.5 CDN for styling -->
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+
     <style>
-        /* 페이지와 그리드 컨테이너 스타일 */
         body {
             font-family: 'Arial', sans-serif;
             background-color: #f8f9fa;
         }
-
         .container {
-            max-width: 1200px;
+            max-width: 51%;
             margin-top: 20px;
         }
-
         .row-header {
             font-size: 1.25rem;
             font-weight: bold;
             margin-bottom: 20px;
         }
-
-
-        /* 그리드 크기 설정 */
         #grid {
-            width: 100%; /* 전체 너비 */
-            height: 100%; /* 전체 높이 */
+            width: 100%;
+            height: 100%;
         }
-
-        /* 검색창 디자인 */
         .search-container {
             margin-bottom: 20px;
         }
-
         .search-container input {
             margin-right: 10px;
             margin-bottom: 10px;
         }
-
-        /* 버튼 디자인 */
         .btn-primary {
             background-color: #007bff;
             border-color: #007bff;
-            width: 50%; /* 버튼 가로 크기 100%로 설정 */
+            width: 50%;
         }
-
     </style>
 </head>
+
+<body>
+<div class="container">
+    <div class="row">
+        <div class="col-md-12 row-header">
+            <h4>게시판 목록</h4>
+        </div>
+    </div>
+
+    <!-- 검색창 -->
+    <div class="row search-container">
+        <div class="col-md-3">
+            <input type="text" id="searchTitle" class="form-control" placeholder="제목 검색">
+        </div>
+        <div class="col-md-3">
+            <input type="text" id="searchContent" class="form-control" placeholder="내용 검색">
+        </div>
+        <div class="col-md-3">
+            <input type="text" id="searchAuthorId" class="form-control" placeholder="작성자 검색">
+        </div>
+        <div class="col-md-3">
+            <button class="btn btn-primary" onclick="searchList()">검색</button>
+        </div>
+    </div>
+
+    <!-- 그리드 -->
+    <div id="grid"></div>
+
+    <!-- 하단 버튼 -->
+    <div class="d-flex justify-content-end mt-3">
+        <a th:href="@{ / }" class="btn btn-primary" style="width: 100px;">이전으로</a>
+        <button class="btn btn-success" style="width: 150px; margin-left: 10px;" onclick="writeBoard()">게시물 등록</button>
+    </div>
+</div>
+
 <script type="text/javascript">
     let grid;
 
-    $(document).ready(function (){
+    $(document).ready(function () {
         loadGrid();
 
-        $("input").keydown(function(event) {
-            if(event.keyCode == 13) {
+        $("input").keydown(function (event) {
+            if (event.keyCode === 13) {
                 searchList();
             }
         });
@@ -74,122 +109,81 @@
             url: "/board/boardList/data",
             method: "GET",
             data: {
-                "title"   : $("#searchTitle").val(),
-                "content" : $("#searchContent").val(),
+                "title": $("#searchTitle").val(),
+                "content": $("#searchContent").val(),
                 "authorId": $("#searchAuthorId").val()
             },
-            success: function(data) {
-                // 데이터를 내림차순으로 정렬
-                data.sort(function(a, b) {
+            success: function (data) {
+                data.sort(function (a, b) {
                     return b.boardId - a.boardId;
                 });
 
-                // 게시판 그리드 생성 또는 데이터 갱신
-                if(!grid) {
+                if (!grid) {
                     grid = new tui.Grid({
                         el: document.getElementById("grid"),
                         data: data,
                         columns: [
-                            { header: 'ID', name: 'boardId', width: 50, align: 'center', hidden: 1 },
-                            { header: '제목', name: 'title', width: 300, align: 'left' },
-                            { header: '작성자', name: 'authorId', width: 100, align: 'center' },
-                            { header: '작성일',
-                              name: 'createDate',
-                              width: 150,
-                              align: 'center',
-                              formatter: ({ value }) => { return value ? dayjs(value).format('YYYY-MM-DD') : '';}
+                            { header: 'ID', name: 'boardId', width: 50, align: 'center', hidden: true },
+                            { header: '제목', name: 'title', width: 250, align: 'left' },
+                            { header: '작성자', name: 'authorId', width: 120, align: 'center' },
+                            {
+                                header: '작성일',
+                                name: 'createDate',
+                                width: 150,
+                                align: 'center',
+                                formatter: ({ value }) => value ? dayjs(value).format('YYYY-MM-DD') : ''
                             },
-                            { header: '수정일',
-                              name: 'updateDate',
-                              width: 150,
-                              align: 'center',
-                              formatter: ({ value }) => { return value ? dayjs(value).format('YYYY-MM-DD') : '';}
+                            {
+                                header: '수정일',
+                                name: 'updateDate',
+                                width: 150,
+                                align: 'center',
+                                formatter: ({ value }) => value ? dayjs(value).format('YYYY-MM-DD') : ''
                             },
-                            { header: '첨부파일',
-                              name: 'fileList',
-                              width: 150,
-                              align: 'center',
-                              formatter: function({value}) {
-                                    if(!value || value.length == 0) {
-                                        return 'X';
-                                    } else {
-                                        return 'O';
-                                    }
-                              }
+                            {
+                                header: '첨부파일',
+                                name: 'fileList',
+                                width: 120,
+                                align: 'center',
+                                formatter: ({ value }) => value && value.length ? '<img src="/images/icons8-file-100.png" alt="첨부파일" width="24" height="24">' : ''
                             },
                             { header: '조회수', name: 'viewCount', width: 100, align: 'center' },
                         ],
+                        pageOptions: {
+                            useClient: true,
+                            perPage: 5
+                        },
                         rowHeaders: ['rowNum'],
                     });
 
-                    grid.on('click', function(e) {
-                        if(e.columnName == 'title' && e.targetType == 'cell') {
-                            const rowKey = e.rowKey;
-                            const rowData = grid.getRow(rowKey);
-
+                    grid.on('click', function (e) {
+                        if (e.columnName === 'title' && e.targetType === 'cell') {
+                            const rowData = grid.getRow(e.rowKey);
                             boardDetail(rowData.boardId);
                         }
                     });
                 } else {
-                    grid.resetData(data); // 기존 그리드 갱신
+                    grid.resetData(data);
                 }
             },
-            error: function(xhr, status, error) {
+            error: function (xhr, status, error) {
                 alert("오류가 발생했습니다.");
             }
         });
     }
 
-    //게시물 상세
-    function boardDetail(id) {
-        window.location.href = '/board/boardDetail/' + id;
-    }
-
-    //게시물 검색
     function searchList() {
         loadGrid();
     }
 
-    //게시물 등록
-    function writeBoard() {
-        window.location.href = '/board/writeBoard'
+    function boardDetail(id) {
+        window.location.href = '/board/boardDetail/' + id;
     }
 
+    function writeBoard() {
+        window.location.href = '/board/writeBoard';
+    }
 </script>
-<body>
-<div class="container">
-    <div class="row">
-        <div class="col-md-12 row-header">
-            <h4>게시판 목록</h4>
-        </div>
-    </div>
 
-    <!-- 검색 조건 입력 -->
-    <div class="row search-container" style="display: ruby;">
-        <div class="col-md-3">
-            <label for="searchTitle"></label>
-            <input type="text" id="searchTitle" class="form-control" placeholder="제목 검색">
-        </div>
-        <div class="col-md-3">
-            <label for="searchContent"></label>
-            <input type="text" id="searchContent" class="form-control" placeholder="내용 검색">
-        </div>
-        <div class="col-md-3">
-            <label for="searchAuthorId"></label>
-            <input type="text" id="searchAuthorId" class="form-control" placeholder="작성자 검색">
-        </div>
-        <div class="col-md-3">
-            <button class="btn btn-primary" onclick="searchList()">검색</button>
-        </div>
-    </div>
-
-    <!-- 그리드 -->
-    <div id="grid"></div>
-    <!-- 게시물 등록 버튼 -->
-    <div class="d-flex justify-content-end mt-3">
-        <a th:href="@{/}" class="btn btn-primary" style="width: 100px;">이전으로</a>
-        <button class="btn btn-success" style="width: 150px; margin-left: 10px;" onclick="writeBoard()">게시물 등록</button>
-    </div>
-</div>
 </body>
 </html>
