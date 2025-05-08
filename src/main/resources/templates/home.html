@@ -91,7 +91,7 @@
 
 <div class="home-card">
     <div class="home-title">게시판 프로젝트</div>
-    <div class="user-name" th:text="${member.memberNm} + '님 환영합니다.'">홍길동님 환영합니다.</div>
+    <div class="user-name" th:text="${member.memberId} + '님 환영합니다.'">홍길동님 환영합니다.</div>
 
     <a th:href="@{/board/boardList}" class="btn btn-board btn-custom">
         <i class="bi bi-list-ul"></i> 게시판 보기

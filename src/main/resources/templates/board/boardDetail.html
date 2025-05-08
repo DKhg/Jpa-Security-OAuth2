@@ -99,12 +99,17 @@
           //다시 그리기 위해서 빈 리스트 설정
           list.empty();
 
-          //담아둔 file 하나씩 리스트로 그려주기
+          // 담아둔 file 하나씩 리스트로 그려주기
           selectedFiles.forEach((file, index) => {
-              list.append(`<li class="list-group-item d-flex justify-content-between align-items-center">
-                  <a href="/file/${file.fileId}/download" class="blue-underline">${file.name}</a>
-                  <button type="button" class="btn btn-sm btn-danger" onclick="removeFile(${index})">삭제</button>
-                </li>
+              list.append(`
+                  <li class="list-group-item d-flex justify-content-between align-items-center">
+                      <span>
+                          ${file.isServerFile
+                              ? `<a href="/file/${file.fileId}/download" class="blue-underline">${file.name}</a>`
+                              : file.name}
+                      </span>
+                      <button type="button" class="btn btn-sm btn-danger" onclick="removeFile(${index})">삭제</button>
+                  </li>
               `);
           });
       }
