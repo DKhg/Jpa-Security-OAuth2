@@ -41,7 +41,7 @@ public class Board {
     private LocalDateTime updateDate;   //수정날짜
 
     @Column(name = "view_count", nullable = false)
-    private Integer viewCount;          //조회수
+    private Integer viewCount = 0;          //조회수
 
     @OneToMany(mappedBy = "board", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<File> fileList;        //게시물에 첨부된 파일리스트(다대일관계)

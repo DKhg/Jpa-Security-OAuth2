@@ -111,40 +111,41 @@
 
       //첨부파일 삭제
       function removeFile(index) {
-          confirm("정말 삭제하시겠습니까?");
-
+          //삭제할 파일
           const file = selectedFiles[index];
 
-          //서버파일 삭제
-          if(file && file.fileId) {
-              $.ajax({
-                  url: '/file/deleteFile/' + file.fileId,
-                  type: "POST",
-                  data: { fileId : file.fileId },
-                  beforeSend: function(xhr) {
-                      xhr.setRequestHeader(csrfHeader, csrfToken);
-                  },
-                  success: function(data) {
-                      if(data.status == 'success'){
-                          alert(data.message);
-                          //화면의 리스트에서도 제거
-                          selectedFiles = selectedFiles.filter(f => f.fileId !== file.fileId);
-                          updateFileList();
-                      } else {
-                          alert(data.message);
+          if(confirm("정말 삭제하시겠습니까?")) {
+              //서버파일 삭제
+              if(file && file.fileId) {
+                  $.ajax({
+                      url: '/file/deleteFile/' + file.fileId,
+                      type: "POST",
+                      data: { fileId : file.fileId },
+                      beforeSend: function(xhr) {
+                          xhr.setRequestHeader(csrfHeader, csrfToken);
+                      },
+                      success: function(data) {
+                          if(data.status == 'success'){
+                              alert(data.message);
+                              //화면의 리스트에서도 제거
+                              selectedFiles = selectedFiles.filter(f => f.fileId !== file.fileId);
+                              updateFileList();
+                          } else {
+                              alert(data.message);
+                          }
+                      },
+                      error: function(xhr) {
+                          alert('파일 삭제에 실패했습니다.');
                       }
-                  },
-                  error: function(xhr) {
-                      alert('파일 삭제에 실패했습니다.');
-                  }
-              });
+                  });
+              } else {
+                  //서버 파일이 아닌 요소 삭제
+                  selectedFiles.splice(index, 1);
+                  updateFileList();
+              }
           } else {
-              //서버 파일이 아닌 요소 삭제
-              selectedFiles.splice(index, 1);
-              updateFileList();
+            return;
           }
-
-
       }
 
       //게시물 수정
@@ -288,13 +289,13 @@
               <div class="col-md-6">
                 <label class="form-label"><strong>작성일</strong></label>
                 <label>
-                  <input type="text" th:name="createDate" th:value="${boardDto.createDate}" class="form-control" readonly />
+                  <input type="text" th:value="${boardDto.createDate != null ? boardDto.createDate.toLocalDate() : ''}" class="form-control" readonly />
                 </label>
               </div>
               <div class="col-md-6">
                 <label class="form-label"><strong>수정일</strong></label>
                 <label>
-                  <input type="text" th:name="updateDate" th:value="${boardDto.updateDate}" class="form-control" readonly />
+                  <input type="text" th:value="${boardDto.updateDate != null ? boardDto.updateDate.toLocalDate() : ''}" class="form-control" readonly />
                 </label>
               </div>
             </div>
