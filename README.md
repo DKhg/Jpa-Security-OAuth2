@@ -108,24 +108,22 @@
 |View|Method|End Point|
 |:----:|:----:|:----:|
 |메인 페이지|Get|/|
-|회원 가입 페이지|Get|/members/new|
-|회원 가입|Post|/members/new|
-|로그인 에러 페이지|Get|/members/login/error|
-|로그인|Get|/members/login|
-|상품 등록|Post|/admin/item/new|
-|상품 등록 페이지|Get|/admin/item/new|
-|상품 조회|Get|/admin/item/{itemId}|
-|상품 수정|Post|/admin/item/{itemId}|
-|상품 관리|Get|/admin/items, /admin/items/{page}|
-|상품 상세 페이지|Get|/item/{itemId}|
-|장바구니 담기|Post|/cart|
-|장바구니 페이지|Get|/cart|
-|장바구니 상품 수정|Patch|/cartItem/{cartItemId}|
-|장바구니 상품 제거|Delete|/cartItem/{cartItemId}|
-|장바구니 상품 주문|Post|/cart/orders|
-|주문하기|Post|/order|
-|주문 내역 페이지|Get|/orders, /orders/{page}|
-|주문 취소|Post|/order/{orderId}/cancel|
+|로그인 페이지|Get|/loginPage|
+|회원 가입 페이지|Get|/member/joinForm|
+|회원 가입|Post|/member/join|
+|이메일 인증번호 전송|Post|/member/sendEmail|
+|아이디 중복체크|Post|/member/idCheck|
+|회원 정보 수정 페이지|Get|/member/updateForm|
+|회원 정보 수정|Post|/member/update|
+|게시물 목록 페이지|Get|/board/boardList|
+|게시물 목록 조회|Get|/board/boardList/data|
+|게시물 상세 페이지|Get|/board/boardDetail/{boardId}|
+|게시물 수정|Post|/board/updateBoard/{boardId}|
+|게시물 삭제|Post|/board/deleteBoard/{boardId}|
+|게시물 등록 페이지|Get|/board/writeBoard|
+|게시물 등록|Post|/board/saveBoard|
+|파일 다운로드|Get|/file/{fileId}/download|
+|파일 삭제|Post|/file/deleteFile/{fileId}|
 <br>
 
 
