@@ -31,56 +31,38 @@
 
 ## 로그인 화면
 
-* 메인화면에는 가구 쇼핑몰의 대표적인 배너와 관리자들이 등록한 상품의 이름, 상세설명, 가격을 보여주었습니다. 
-* Thymeleaf Layout Dialect dependency를 추가하여 하나의 layout 페이지를 여러페이지에 적용할 수 있게 하였습니다. &nbsp; 그리고 footer, header를 만들고 layout에서 변경되는 영역엔 fragment="content"로 설정하여 만들페이지를 끼워 넣었습니다.
-* Navbar는 부트스트랩을 참고하여 만들었고 header영역에도 추가 하였습니다. &nbsp; 회원가입, 상품등록, 주문 등 이후에 메인페이지로 돌아갈 수 있게 main.html를 만들었습니다.
-
-
-
+* 로그인 화면에서 로그인, 소셜로그인, 회원가입 기능을 제공
+* Spring Security 활용하여 구현
+* 소셜 로그인 시 사용자가 별도의 회원가입 절차 없이 바로 가입되는 방식으로 구현
 <br>
 
 ![login](https://github.com/user-attachments/assets/a367552c-7fce-48ef-bd71-2e2be0eed560)
 
+<br>
+
+
+## 회원가입 화면
+
+* 회원가입 화면에서 중복 확인과 이메일 인증을 통해, 두 절차가 모두 완료되어야만 가입이 가능하게 구현
+
 
 <br>
 
 
-## 로그인, 회원가입
-
-* 회원가입, 로그인은 security dependency를 추가하여 구현하였습니다.&nbsp; 그에 따라 WebSecurityConfigurerAdapter를 상속 받는 클래스에 @EnableWebSecurity 어노테이션을 선언하여 SpringSecurityFilterChain이 자동으로 포함이 되게 하였고 메소드 오버라이딩을 통해 보안 설정을 커스터마이징 하였습니다. 
-* SecurityConfig.java를 만들어 보안 설정을 하였습니다.&nbsp; 각각 멤버가 일반 유저인지 관리자인지 구분할 수 있게 Role.java 코드를 작성했습니다.&nbsp; 회원가입에 있어서 멤버가 유저인지 관리자인지 구분할 수 있는 역할이 있어야 했는데 enum 타입의 Role.java 를 만들었습니다.  
-*  회원가입 페이지는 부트스트랩을 참고하여 변형하여 사용하였습니다.&nbsp; validation dependency를 추가하여 회원 가입 처리를 할때 유효성 검증을 할 수 있게하여 회원가입이 실패하면 다시 회원 가입 페이지로 이동해 이유를 화면에 명시하였고 회원가입이 성공하면 메인페이지로 리다이렉트 시켜주었습니다.  
-*  로그인, 로그아웃은 비밀번호 암호화를 위해 PasswordEncoder를 사용하였고 MemberService가 데이터베이스에서 회원 정보를 가져오는 역할을 하는 UserDetailsService를 구현하게 하여 기능을 만들었습니다.
-
-
-<br>
-
-![로그인페이지](https://user-images.githubusercontent.com/106241314/216755806-59419d80-ce15-4161-895d-26929597b27f.png)
-
-<br>
-
-![회원가입페이지](https://user-images.githubusercontent.com/106241314/216755814-db85fcee-b4ad-4cec-9801-2059f027bb96.png)
+![join](https://github.com/user-attachments/assets/a761087d-6ab9-40a4-9169-ae68b36d5cb8)
+![join2](https://github.com/user-attachments/assets/8c56b287-078f-45db-a3ca-1756df49682a)
 
 <br>
 
 
+## 메인 화면
 
-## 상품등록, 관리 ( 관리자용 )
-
-* 상품등록과 관리는 관리자만 이용할 수 있게 구현하였으며, 관리에서 상품이름에 링크를 걸어 들어가면 수정까지 할 수 있게 하였습니다. 
-* 영속성 전이를 위해 연관관계 어노테이션 안에 부모 엔티티의 영속성 상태 변화를 자식 엔티티에 모두 전이하게 해주는 cascade = CascadeType.ALL 옵션을 설정 하였습니다.&nbsp; 그리고 부모 엔티티와 연관관계가 끊어진 자식 엔티티인 고아 객체 제거기능을 위해 위 옵션에 이어 뒤에 orphanRemoval = true 옵션도 추가 설정하였습니다. 
-* 서비스를 사용하는데 있어서 오류나 문의사항이 생겼을때 활용이 가능하게 하는 JPA의 Auditing 를 위해 AuditConfig.java를 생성하고 @EnableJpaAuditing 어노테이션을 넣어 기능을 활성화하였습니다.&nbsp; 그리고 등록자와 수정자를 처리해주는 AuditorAwar을 @Bean으로 등록해해 공통으로 엔티티가 저장 또는 수정될 때 자동으로 등록일, 수정일, 등록자, 수정자를 입력해주게 하였습니다.&nbsp; 보통 테이블에는 위의 4가지를 모두 넣어주지만 어떤 테이블은 등록자, 수정자를 넣지않아 BaseTimeEntity만 상속받을 수 있도록 BaseTimeEntity를 생성하였습니다.&nbsp; 그리고 상속받을 수 있게 BaseEntity도 생성했습니다. 
-* 상품등록과 관리의 수정에 사용할 데이터 전달을 위해 이를 도와주는 modelmapper 라이브러리를 추가하여 원활하게 해주었습니다.&nbsp; 상품의 이미지파일을 등록할때 경로 지정을 위해 application.properties에 itemLmgLocation을 추가하여 파일을 읽어올 경로를 설정 하였고 WebMvcConfigurer 인터페이스를 구현하는 WebMvcConfig.java 파일을 작성하였습니다.&nbsp; 그다음 addResourceHandlers 메소드를 통해 자신의 컴퓨터에 업로드한 파일을 찾을 위치를 설정하였습니다.&nbsp; 이 파일을 처리할 FileService.java를 만들어 UUID로 받은 값과 원래의 파일 이름 확장자를 조합해 저장될 파일이름을 만들고, FileOutputStream 클래스를 이용하여 파일이 저장될 위치와 파일에 쓸 파일 출력 스트림을 만들었습니다. 
-* 상품 관리를 위해 조회를 할 때 @Transactional(readOnly = true)를 설정하여 성능을 향상 시켰습니다.&nbsp; 그리고 수정기능을 추가 하였습니다. 이미지 수정은 상품 등록과 같이 itemImgRepository.save() 로직을 호출하지 않고 영속상태의 데이터를 변경하는 것만으로 변경 감지 기능이 동작하게 하여 트랜잭션이 끝날 때 update 쿼리가 실행되도록 하였습니다.
-
+* 메인 화면에서 게시판 목록 조회, 회원 정보 수정, 로그아웃 기능을 제공
+* 소셜 로그인 사용자는 회원 정보 수정 할 수 없게 구현
 
 <br>
 
-![상품등록화면](https://user-images.githubusercontent.com/106241314/216755823-4ad60866-5cb8-4caa-89a4-9ca371bf9b20.png)
-
-<br>
-
-![상품관리화면](https://user-images.githubusercontent.com/106241314/216755826-1aaadfbb-4f45-451f-86a5-ca4462f9ec13.png)
+![main](https://github.com/user-attachments/assets/a17c044d-14ac-4efd-be23-512b50e7b4af)
 
 <br>
 
