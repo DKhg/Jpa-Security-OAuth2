@@ -23,41 +23,11 @@
 
 <br>
 
-## 🖊DB 모델링
-![shoppingmall (3)](https://user-images.githubusercontent.com/106241314/215694670-38b41fa9-21aa-4326-8189-a13deb2fadc4.png)
-
-
-1.&nbsp; member : 회원 정보 테이블
-
-
-2.&nbsp; cart : 회원의 장바구니 목록 테이블
-
-
-3.&nbsp; cart_item : 장바구니에 담긴 상품 정보 테이블
-
-
-4.&nbsp; orders : 쇼핑몰 회원들의 주문 목록 테이블
-
-
-5.&nbsp; order_item : 주문된 상품 정보 테이블
-
-
-6.&nbsp; item : 상품 정보 테이블
-
-
-7.&nbsp; item_img : 상품에 대한 이미지 정보를 담고 있는 테이블
-<br>
-
-
 ## 🔧구현 기능
-- 회원(Member) : 회원가입, 로그인, 로그아웃 
+- 회원(Member) : 회원가입, 회원정보 수정, 로그인(OAuth2 포함), 로그아웃 
 <br>     < Spring Security를 이용하여 구현, 유효성 검증 사용 >
-- 상품(Item) : 상품등록, 상품조회, 상품관리
-<br>     < modelmapper 라이브러리, Querydsl 이용 >
-<br> 상품수정, 상품 상세 페이지
-- 주문(Order) : 상품주문, 주문내역 조회, 주문 취소
-
-<br>
+- 게시물(Board) : 게시물 등록, 게시물 조회, 게시물 수정, 게시물 상세, 게시물 삭제
+<br>    
 
 ## 메인화면
 
