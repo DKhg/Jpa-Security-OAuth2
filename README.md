@@ -29,7 +29,7 @@
 - 게시물(Board) : 게시물 등록, 게시물 조회, 게시물 수정, 게시물 상세, 게시물 삭제
 <br>    
 
-## 메인화면
+## 로그인 화면
 
 * 메인화면에는 가구 쇼핑몰의 대표적인 배너와 관리자들이 등록한 상품의 이름, 상세설명, 가격을 보여주었습니다. 
 * Thymeleaf Layout Dialect dependency를 추가하여 하나의 layout 페이지를 여러페이지에 적용할 수 있게 하였습니다. &nbsp; 그리고 footer, header를 만들고 layout에서 변경되는 영역엔 fragment="content"로 설정하여 만들페이지를 끼워 넣었습니다.
@@ -38,12 +38,10 @@
 
 
 <br>
+![image](https://github.com/user-attachments/assets/7a414edc-4bb1-4ca1-aeea-5d5fd896466d)
 
 ![메인화면](https://user-images.githubusercontent.com/106241314/216755638-5e4768c2-f0ff-4bdd-8077-079b949b80d3.png)
 
-<br>
-
-![메인화면2](https://user-images.githubusercontent.com/106241314/216755785-eee2b926-8841-4467-8a75-8e76e08079d8.png)
 
 <br>
 
