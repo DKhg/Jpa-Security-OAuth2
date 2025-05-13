@@ -3,7 +3,10 @@
 
 <br>
 
+## 📌 프로젝트 개요
+- Spring Boot 기반의 게시판 프로젝트로, OAuth2 소셜 로그인, 이메일 인증, 파일 첨부 기능 등을 포함한 사용자 인증 및 게시판 기능을 학습 및 구현하기 위해 개발
 
+<br>
 
 ## ⚙프로젝트 개발 환경
 - 운영체제 : Microsoft Windows 11
@@ -21,12 +24,18 @@
 - <img src="https://img.shields.io/badge/Spring Boot-6DB33F?style=for-the-badge&logo=SpringBoot&logoColor=white" /> <img src="https://img.shields.io/badge/Spring Security-6DB33F?style=for-the-badge&logo=SpringSecurity&logoColor=white" />
 - <img src="https://img.shields.io/badge/Hibernate-59666C?style=for-the-badge&logo=Hibernate&logoColor=white" /> <img src="https://img.shields.io/badge/MySQL-4479A1?style=for-the-badge&logo=MySQL&logoColor=white" />
 
+- OAuth2: Spring Security OAuth2 Client
+- 인증 메일: JavaMailSender
+- 파일 업로드: Dropzone.js + Spring Multipart
+- 테이블 UI: Toast UI Grid
+
 <br>
 
 ## 🔧구현 기능
 - 회원(Member) : 회원가입, 회원정보 수정, 로그인(OAuth2 포함), 로그아웃 
-<br>     < Spring Security를 이용하여 구현, 유효성 검증 사용 >
-- 게시물(Board) : 게시물 등록, 게시물 조회, 게시물 수정, 게시물 상세, 게시물 삭제
+- 👉 Spring Security를 이용해 인증/인가 처리, 유효성 검증 적용
+  
+- 게시물(Board) : 게시물 등록(파일 첨부 포함), 게시물 조회, 게시물 수정, 게시물 상세(파일 다운로드 포함), 게시물 삭제
 <br>    
 
 ## 로그인 화면
@@ -128,8 +137,9 @@
 
 
 
-## 🎓프로젝트 배포 (리눅스 서버 + Nginx)🎓
-* 아래 블로그에 설명
+## 🎓프로젝트 배포 🎓
+* 배포 환경 : 리눅스(Ubuntu), Nginx
+* 상세 설명 및 과정은 아래 블로그 참고
 <br>
 https://rhghdrms.tistory.com/34
 <br>
