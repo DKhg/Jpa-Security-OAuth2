@@ -38,9 +38,8 @@
 
 
 <br>
-![로그인화면](https://github.com/DKhg/Jpa-Security-OAuth2/blob/main/images/login.png?raw=true)
 
-![메인화면](https://user-images.githubusercontent.com/106241314/216755638-5e4768c2-f0ff-4bdd-8077-079b949b80d3.png)
+![login](https://github.com/user-attachments/assets/a367552c-7fce-48ef-bd71-2e2be0eed560)
 
 
 <br>
