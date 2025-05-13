@@ -38,7 +38,7 @@
 
 
 <br>
-![Image](https://github.com/user-attachments/assets/f1a0c11a-7266-4242-a9a0-5dfa254042ba)
+![Image](https://github.com/user-attachments/assets/3a6e355a-c999-4571-9ebe-cef322bee51f)
 
 ![메인화면](https://user-images.githubusercontent.com/106241314/216755638-5e4768c2-f0ff-4bdd-8077-079b949b80d3.png)
 
